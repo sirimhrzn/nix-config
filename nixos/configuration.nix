@@ -8,7 +8,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./cachix.nix 
     ];
 
   # Bootloader.
@@ -16,6 +15,11 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.packageOverrides = pkgs: {
+  #   nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+  #     inherit pkgs;
+  #   };
+  # };
   networking = {
       hostName = "nixos";
   };
@@ -29,18 +33,18 @@
 programs.starship = {
    enable = true;
 };
-fonts.packages = with pkgs; [
-  noto-fonts
-  noto-fonts-cjk
-  noto-fonts-emoji
-  liberation_ttf
-  fira-code
-  fira-code-symbols
-  mplus-outline-fonts.githubRelease
-  dina-font
-  proggyfonts
-  noto-fonts-emoji
-  (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "JetBrainsMono"]; })
+fonts.packages =  [
+  pkgs.noto-fonts
+  pkgs.noto-fonts-cjk
+  pkgs.noto-fonts-emoji
+  pkgs.liberation_ttf
+  pkgs.fira-code
+  pkgs.fira-code-symbols
+  pkgs.mplus-outline-fonts.githubRelease
+  pkgs.dina-font
+  pkgs.proggyfonts
+  pkgs.noto-fonts-emoji
+  (nixpkgs-unstable.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "JetBrainsMono" "ZedMono"]; })
 ];
 
 programs.zsh.enable = true;
@@ -91,14 +95,12 @@ services.pipewire = {
     extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd"];
     packages = [
     pkgs.firefox-wayland
-    pkgs.brave
-    pkgs.zellij
+    nixpkgs-unstable.brave
     pkgs.networkmanagerapplet
     pkgs.openvpn
     pkgs.font-awesome
     pkgs.nerdfonts
     pkgs.oh-my-zsh
-    pkgs.neovim
     pkgs.acpi
     pkgs.gnome.nautilus
     pkgs.gitui
@@ -125,16 +127,22 @@ services.pipewire = {
     pkgs.feh
     pkgs.btop
     pkgs.neofetch
+    nixpkgs-unstable.gleam
+    nixpkgs-unstable.go
+    nixpkgs-unstable.gopls
+    nixpkgs-unstable.obsidian
+    nixpkgs-unstable.glab
     nixpkgs-unstable.postman
     nixpkgs-unstable.helix
     nixpkgs-unstable.qutebrowser
     nixpkgs-unstable.vscode
     nixpkgs-unstable.alacritty
-    nixpkgs-unstable.gleam
+    nixpkgs-unstable.erlang
     nixpkgs-unstable.git-cliff
     nixpkgs-unstable.diff-so-fancy
     nixpkgs-unstable.wezterm
     nixpkgs-unstable.bun
+    nixpkgs-unstable.neovim
     ];
   };
   programs.direnv = {
@@ -155,7 +163,7 @@ services.pipewire = {
     pkgs.libnotify
     pkgs.waybar
     pkgs.swww
-    pkgs.kitty
+    nixpkgs-unstable.kitty
     pkgs.polkit_gnome
     pkgs.dolphin
     pkgs.ntfs3g
@@ -170,15 +178,9 @@ services.pipewire = {
     pkgs.sddm
     pkgs.kubectl
     pkgs.xclip
-    pkgs.glib
-    pkgs.glibc
-    pkgs.gcc
-    pkgs.pkg-config
     pkgs.clang
-    pkgs.llvmPackages_16.bintools
-    pkgs.llvmPackages_16.stdenv
-    pkgs.libiconv
     pkgs.openssl.dev
+    nixpkgs-unstable.zellij
     nixpkgs-unstable.rust-script
   ];
   # Some programs need SUID wrappers, can be configured further or are

@@ -18,8 +18,9 @@
 
   networking = {
     hostName = "nixos";
+    nameservers = [
+    ];
   };
-
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   virtualisation.libvirtd.enable = true;
@@ -78,7 +79,6 @@
 
   services.xserver = {
     enable = true;
-    layout = "us";
     displayManager.gdm = {
       enable = true;
       wayland = true;
@@ -106,9 +106,8 @@
       "libvirtd"
     ];
     packages = [
-      pkgs.firefox-wayland
+      pkgs.firefox-beta
       pkgs.networkmanagerapplet
-      pkgs.openvpn
       pkgs.font-awesome
       pkgs.nerdfonts
       pkgs.oh-my-zsh
@@ -124,7 +123,6 @@
       pkgs.bluez-tools
       pkgs.swappy
       pkgs.grimblast
-      pkgs.ripgrep
       pkgs.pamixer
       pkgs.discord
       pkgs.docker
@@ -132,32 +130,34 @@
       pkgs.starship
       pkgs.btop
       pkgs.neofetch
-      pkgs.minikube
+      pkgs.haskellPackages.kmonad
+      nixpkgs-unstable.zed-editor
+      nixpkgs-unstable.nix-direnv
+      nixpkgs-unstable.zoxide
+      nixpkgs-unstable.direnv
+      nixpkgs-unstable.postman
       nixpkgs-unstable.brave
       nixpkgs-unstable.nodePackages.npm
       nixpkgs-unstable.go
       nixpkgs-unstable.gopls
       nixpkgs-unstable.glab
-      nixpkgs-unstable.helix
-      nixpkgs-unstable.qutebrowser
       nixpkgs-unstable.vscode
       nixpkgs-unstable.alacritty
       nixpkgs-unstable.git-cliff
       nixpkgs-unstable.delta
-      nixpkgs-unstable.wezterm
-      nixpkgs-unstable.bun
       nixpkgs-unstable.neovim
     ];
   };
-  programs.direnv = {
-    enable = false;
-  };
+
   nix.settings.trusted-users = [
     "root"
     "sirimhrzn"
   ];
   # programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
+  environment.interactiveShellInit = ''
+	alias ls="eza";
+  '';
 
   services.nginx =
     let
@@ -184,6 +184,7 @@
     allowedTCPPorts = [
       80
       443
+      9000
     ];
   };
 
@@ -211,13 +212,15 @@
     pkgs.xclip
     pkgs.clang
     pkgs.rsyslog
+    pkgs.openvpn
+    pkgs.ripgrep
     pkgs.openssl.dev
-    pkgs.php82
+    pkgs.eza
     pkgs.nginx
     nixpkgs-unstable.kitty
     nixpkgs-unstable.zellij
-    nixpkgs-unstable.rust-script
   ];
+  
   services.openssh.enable = true;
   services.rsyslogd = {
     enable = true;
@@ -228,10 +231,9 @@
       if $programname == 'nginx' then /var/log/nginx.log
     '';
   };
-
   virtualisation.docker = {
     enable = true;
-    enableOnBoot = true;
+    enableOnBoot = false;
   };
   virtualisation.oci-containers = {
     backend = "docker";

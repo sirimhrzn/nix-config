@@ -1,11 +1,10 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
 {
   config,
   pkgs,
-  nixpkgs-unstable,
+  unstable,
   ...
 }:
 {
@@ -40,7 +39,7 @@
     pkgs.dina-font
     pkgs.proggyfonts
     pkgs.noto-fonts-emoji
-    (nixpkgs-unstable.nerdfonts.override {
+    (unstable.nerdfonts.override {
       fonts = [
         "FiraCode"
         "DroidSansMono"
@@ -71,28 +70,24 @@
     opengl.enable = true;
     nvidia.modesetting.enable = true;
   };
-
-  programs.hyprland = {
+ services.xserver = {
     enable = true;
-    xwayland.enable = true;
-  };
-
-  services.xserver = {
-    enable = true;
-    displayManager.gdm = {
+    windowManager.bspwm = {
+       enable = true;
+       package = unstable.bspwm;
+       configFile = "/home/sirimhrzn/.config/bspwm/bspwmrc";
+       sxhkd = {
+       package = unstable.sxhkd;
+       configFile = "/home/sirimhrzn/.config/bspwm/sxhkdrc";
+       };
+    };
+    desktopManager.xfce = {
+       enableXfwm = false;
+    };
+   displayManager.lightdm = {
       enable = true;
-      wayland = true;
     };
   };
-
-  xdg.portal.enable = true;
-  xdg.autostart.enable = true;
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-hyprland
-    xdg-desktop-portal
-    xdg-desktop-portal-gtk
-  ];
-
   users.groups.sirimhrzn = { };
   users.users.sirimhrzn = {
     isNormalUser = true;
@@ -112,7 +107,7 @@
       pkgs.nerdfonts
       pkgs.oh-my-zsh
       pkgs.acpi
-      pkgs.gnome.nautilus
+      # pkgs.gnome.nautilus
       pkgs.gitui
       pkgs.cargo
       pkgs.bat
@@ -129,23 +124,30 @@
       pkgs.silicon
       pkgs.starship
       pkgs.btop
+      pkgs.ksnip
       pkgs.neofetch
+
+      pkgs.pulseaudio
+      unstable.dmenu-rs
+
       pkgs.haskellPackages.kmonad
-      nixpkgs-unstable.zed-editor
-      nixpkgs-unstable.nix-direnv
-      nixpkgs-unstable.zoxide
-      nixpkgs-unstable.direnv
-      nixpkgs-unstable.postman
-      nixpkgs-unstable.brave
-      nixpkgs-unstable.nodePackages.npm
-      nixpkgs-unstable.go
-      nixpkgs-unstable.gopls
-      nixpkgs-unstable.glab
-      nixpkgs-unstable.vscode
-      nixpkgs-unstable.alacritty
-      nixpkgs-unstable.git-cliff
-      nixpkgs-unstable.delta
-      nixpkgs-unstable.neovim
+      pkgs.picom
+      # unstable.zed-editor
+      unstable.nix-direnv
+      unstable.teams-for-linux
+      unstable.zoxide
+      unstable.direnv
+      unstable.postman
+      unstable.brave
+      unstable.nodePackages.npm
+      unstable.go
+      unstable.gopls
+      unstable.glab
+      unstable.vscode
+      unstable.alacritty
+      unstable.git-cliff
+      unstable.delta
+      unstable.neovim
     ];
   };
 
@@ -153,7 +155,6 @@
     "root"
     "sirimhrzn"
   ];
-  # programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   environment.interactiveShellInit = ''
 	alias ls="eza";
@@ -201,6 +202,8 @@
     pkgs.wl-clipboard
     pkgs.curl
     pkgs.zsh
+    pkgs.polybar
+    pkgs.rofi
     pkgs.fluent-bit
     pkgs.brightnessctl
     pkgs.wofi
@@ -217,8 +220,9 @@
     pkgs.openssl.dev
     pkgs.eza
     pkgs.nginx
-    nixpkgs-unstable.kitty
-    nixpkgs-unstable.zellij
+    pkgs.feh
+    unstable.kitty
+    unstable.zellij
   ];
   
   services.openssh.enable = true;

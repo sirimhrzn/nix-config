@@ -19,28 +19,18 @@
           allowUnfree = true;
         };
       };
+      unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations = {
         sirimhrzn = nixpkgs.lib.nixosSystem {
           specialArgs = {
-            inherit system;
+            inherit system unstable;
           };
-          modules =
-            let
-              defaults =
-                { pkgs, ... }:
-                {
-                  _module.args.nixpkgs-unstable = import nixpkgs-unstable {
-                    inherit system;
-                    config.allowUnfree = true;
-                  };
-                };
-            in
-            [
-              defaults
-              ./nixos/configuration.nix
-            ];
+          modules = [ ./nixos/configuration.nix ];
         };
       };
     };

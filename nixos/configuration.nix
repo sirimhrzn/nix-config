@@ -57,6 +57,7 @@
     pulse.enable = true;
     jack.enable = true;
   };
+  programs.light.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -70,22 +71,31 @@
     opengl.enable = true;
     nvidia.modesetting.enable = true;
   };
+
+  services.gnome.gnome-keyring.enable = true;
+  # xdg.configFile."sway/config".source = pkgs.lib.mkOverride 0 "/home/sirimhrzn/.config/sway/config.in";
+  programs.sway = {
+     enable = true;
+     wrapperFeatures.gtk = true;
+     package = pkgs.sway;
+     extraOptions = [
+     "-c /home/sirimhrzn/.config/sway/config"
+     ];
+     extraPackages = with pkgs; [
+  	i3status i3status-rust
+  	termite rofi light
+	swaylock swayidle foot
+     ];
+  };
  services.xserver = {
     enable = true;
-    windowManager.bspwm = {
-       enable = true;
-       package = unstable.bspwm;
-       configFile = "/home/sirimhrzn/.config/bspwm/bspwmrc";
-       sxhkd = {
-       package = unstable.sxhkd;
-       configFile = "/home/sirimhrzn/.config/bspwm/sxhkdrc";
-       };
-    };
-    desktopManager.xfce = {
-       enableXfwm = false;
-    };
-   displayManager.lightdm = {
-      enable = true;
+    displayManager = {
+      # defaultSession = "sway";
+      # autoLogin = true;
+        gdm = {
+	  enable = true;
+	  wayland = true;
+	};
     };
   };
   users.groups.sirimhrzn = { };
@@ -124,7 +134,6 @@
       pkgs.silicon
       pkgs.starship
       pkgs.btop
-      pkgs.ksnip
       pkgs.neofetch
 
       pkgs.pulseaudio
@@ -220,97 +229,17 @@
     pkgs.openssl.dev
     pkgs.eza
     pkgs.nginx
-    pkgs.feh
     unstable.kitty
     unstable.zellij
   ];
-  services = {
-      picom = {
-      enable = true;
-      settings = {
-        animations = true;
-        animation-stiffness = 300.0;
-        animation-dampening = 35.0;
-        animation-clamping = false;
-        animation-mass = 1;
-        animation-for-workspace-switch-in = "auto";
-        animation-for-workspace-switch-out = "auto";
-        animation-for-open-window = "slide-down";
-        animation-for-menu-window = "none";
-        animation-for-transient-window = "slide-down";
-        corner-radius = 12;
-        rounded-corners-exclude = [
-          "class_i = 'polybar'"
-          "class_g = 'i3lock'"
-        ];
-        round-borders = 3;
-        round-borders-exclude = [];
-        round-borders-rule = [];
-        shadow = true;
-        shadow-radius = 8;
-        shadow-opacity = 0.4;
-        shadow-offset-x = -8;
-        shadow-offset-y = -8;
-        fading = false;
-        inactive-opacity = 0.8;
-        frame-opacity = 0.7;
-        inactive-opacity-override = false;
-        active-opacity = 1.0;
-        focus-exclude = [
-        ];
-
-        opacity-rule = [
-          "100:class_g = 'i3lock'"
-          "60:class_g = 'Dunst'"
-	  "90:class_g = 'Polybar' && !focused"
-          "100:class_g = 'Alacritty' && focused"
-          "90:class_g = 'Alacritty' && !focused"
-          "100:class_g = 'Kitty' && focused"
-          "90:class_g = 'Kitty' && !focused"
- 
-        ];
-
-        blur-kern = "3x3box";
-        blur = {
-          method = "kernel";
-          strength = 8;
-          background = false;
-          background-frame = false;
-          background-fixed = false;
-          kern = "3x3box";
-        };
-
-        shadow-exclude = [
-          "class_g = 'Dunst'"
-        ];
-
-        blur-background-exclude = [
-          "class_g = 'Dunst'"
-        ];
-
-        backend = "glx";
-        vsync = false;
-        mark-wmwin-focused = true;
-        mark-ovredir-focused = true;
-        detect-rounded-corners = true;
-        detect-client-opacity = false;
-        detect-transient = true;
-        detect-client-leader = true;
-        use-damage = true;
-        log-level = "info";
-
-        wintypes = {
-          normal = { fade = true; shadow = false; };
-          tooltip = { fade = true; shadow = false; opacity = 0.75; focus = true; full-shadow = false; };
-          dock = { shadow = false; };
-          dnd = { shadow = false; };
-          popup_menu = { opacity = 1.0; };
-          dropdown_menu = { opacity = 1.0; };
-        };
-      };
+  systemd.user.services.sway = {
+    description = "Sway";
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = ''${pkgs.sway}/bin/sway --config /home/sirimhrzn/.config/sway/config'';
     };
-  }; 
-  services.openssh.enable = true;
+  };
+ services.openssh.enable = true;
   services.rsyslogd = {
     enable = true;
     extraConfig = ''

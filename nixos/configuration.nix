@@ -5,25 +5,48 @@
   config,
   pkgs,
   unstable,
+  inputs,
   ...
 }:
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    inputs.home-manager.nixosModules.default
+    ./services
+  ];
+  home-manager = {
+    extraSpecialArgs = {
+      inherit inputs;
+    };
+    users = {
+      "sirimhrzn" = import ./home.nix;
+    };
+  };
+  security.polkit.enable = true;
 
-  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub = {
+    enable = true;
+    zfsSupport = true;
+    efiSupport = true;
+    device = "nodev";
+  };
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   nixpkgs.config.allowUnfree = true;
 
   networking = {
     hostName = "nixos";
-    nameservers = [
-    ];
+    nameservers = [ ];
   };
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   virtualisation.libvirtd.enable = true;
   boot.kernelModules = [ "kvm-intel" ];
+  # services.xserver.videoDrivers = [ "nvidia" ];
 
   programs.starship = {
     enable = true;
@@ -32,21 +55,8 @@
     pkgs.noto-fonts
     pkgs.noto-fonts-cjk
     pkgs.noto-fonts-emoji
-    pkgs.liberation_ttf
-    pkgs.fira-code
-    pkgs.fira-code-symbols
-    pkgs.mplus-outline-fonts.githubRelease
-    pkgs.dina-font
-    pkgs.proggyfonts
     pkgs.noto-fonts-emoji
-    (unstable.nerdfonts.override {
-      fonts = [
-        "FiraCode"
-        "DroidSansMono"
-        "JetBrainsMono"
-        "ZedMono"
-      ];
-    })
+    (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
 
   programs.zsh.enable = true;
@@ -62,7 +72,6 @@
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
   networking.networkmanager.enable = true;
   time.timeZone = "Asia/Kathmandu";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -75,29 +84,27 @@
   services.gnome.gnome-keyring.enable = true;
   # xdg.configFile."sway/config".source = pkgs.lib.mkOverride 0 "/home/sirimhrzn/.config/sway/config.in";
   programs.sway = {
-     enable = true;
-     wrapperFeatures.gtk = true;
-     package = pkgs.sway;
-     extraOptions = [
-     "-c /home/sirimhrzn/.config/sway/config"
-     ];
-     extraPackages = with pkgs; [
-  	i3status i3status-rust
-  	termite rofi light
-	swaylock swayidle foot
-     ];
+    enable = true;
+    wrapperFeatures.gtk = true;
+    package = pkgs.swayfx;
+    extraPackages = with pkgs; [
+      i3status
+      termite
+      rofi
+      light
+    ];
   };
- services.xserver = {
+  services.xserver = {
     enable = true;
     displayManager = {
-      # defaultSession = "sway";
-      # autoLogin = true;
-        gdm = {
-	  enable = true;
-	  wayland = true;
-	};
+      gdm = {
+        enable = true;
+        wayland = true;
+      };
     };
   };
+
+  services.blueman.enable = true;
   users.groups.sirimhrzn = { };
   users.users.sirimhrzn = {
     isNormalUser = true;
@@ -111,17 +118,17 @@
       "libvirtd"
     ];
     packages = [
-      pkgs.firefox-beta
       pkgs.networkmanagerapplet
       pkgs.font-awesome
-      pkgs.nerdfonts
       pkgs.oh-my-zsh
       pkgs.acpi
-      # pkgs.gnome.nautilus
+      pkgs.yazi
+      pkgs.gnome.nautilus
+      pkgs.vlc
       pkgs.gitui
       pkgs.cargo
       pkgs.bat
-      pkgs.nodejs_21
+      pkgs.nodejs_22
       pkgs.pavucontrol
       pkgs.blueman
       pkgs.bluez
@@ -129,34 +136,31 @@
       pkgs.swappy
       pkgs.grimblast
       pkgs.pamixer
-      pkgs.discord
       pkgs.docker
       pkgs.silicon
       pkgs.starship
       pkgs.btop
       pkgs.neofetch
-
       pkgs.pulseaudio
-      unstable.dmenu-rs
+      pkgs.ngrok
+      pkgs.streamlink
+      pkgs.zoxide
+      pkgs.postman
+      pkgs.neovim
+      pkgs.virt-manager
+      pkgs.virt-viewer
 
-      pkgs.haskellPackages.kmonad
-      pkgs.picom
-      unstable.zed-editor
-      unstable.nix-direnv
-      unstable.teams-for-linux
-      unstable.zoxide
-      unstable.direnv
-      unstable.postman
-      unstable.brave
       unstable.nodePackages.npm
       unstable.go
       unstable.gopls
       unstable.glab
       unstable.vscode
       unstable.alacritty
+      unstable.wezterm
       unstable.git-cliff
       unstable.delta
-      unstable.neovim
+      unstable.helix
+      unstable.zed-editor
     ];
   };
 
@@ -165,36 +169,26 @@
     "sirimhrzn"
   ];
   users.defaultUserShell = pkgs.zsh;
-  environment.interactiveShellInit = ''
-	alias ls="eza";
-  '';
 
-  services.nginx =
-    let
-      data_dir = "/home/sirimhrzn/Desktop/Genius/news/public";
-    in
-    {
+  programs.direnv = {
+    enable = true;
+    package = pkgs.direnv;
+    nix-direnv = {
       enable = true;
-      recommendedProxySettings = true;
-      virtualHosts.localhost = {
-        extraConfig = ''
-          add_header x-systemd-nginx yes;
-        '';
-        locations."/" = {
-          root = data_dir;
-          extraConfig = ''
-            proxy_pass http://localhost:8080;
-          '';
-        };
-      };
+      package = pkgs.nix-direnv;
     };
-
+  };
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
       80
       443
       9000
+      5432
+      6443
+      10250
+      2379
+      2380
     ];
   };
 
@@ -223,23 +217,20 @@
     pkgs.kubectl
     pkgs.xclip
     pkgs.clang
-    pkgs.rsyslog
     pkgs.openvpn
     pkgs.ripgrep
     pkgs.openssl.dev
     pkgs.eza
     pkgs.nginx
+    pkgs.bun
+    pkgs.wrk
+    pkgs.lua54Packages.lua
+    pkgs.luaformatter
+    pkgs.uutils-coreutils-noprefix
     unstable.kitty
     unstable.zellij
   ];
-  systemd.user.services.sway = {
-    description = "Sway";
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = ''${pkgs.sway}/bin/sway --config /home/sirimhrzn/.config/sway/config'';
-    };
-  };
- services.openssh.enable = true;
+  services.openssh.enable = true;
   services.rsyslogd = {
     enable = true;
     extraConfig = ''
@@ -251,26 +242,67 @@
   };
   virtualisation.docker = {
     enable = true;
-    enableOnBoot = false;
+    enableOnBoot = true;
   };
+  #  services.k3s = {
+  # enable = true;
+  # package = pkgs.k3s;
+  # role = "server";
+  # clusterInit = true;
+  #  };
+  services.k3s =
+    let
+      master_ip = "192.168.5.251";
+    in
+    {
+      enable = true;
+      package = pkgs.k3s;
+      role = "server";
+      clusterInit = true;
+      extraFlags = "--cluster-init --datastore-endpoint=postgres://siri:siri@0.0.0.0:5432/backend-my  --advertise-address=${master_ip} --tls-san=${master_ip}";
+    };
+
+  # Enable and configure etcd
+  # services.etcd = {
+  #   enable = true;
+  #   listenClientUrls = [ "http://0.0.0.0:2379" ];
+  #   advertiseClientUrls = [ "http://192.168.5.251:2379" ];
+  # };
+  #
   virtualisation.oci-containers = {
     backend = "docker";
     containers = {
-      nginx =
-        let
-          dir = "/home/sirimhrzn/nixos-containers/nginx";
-        in
-        {
-          image = "nginx:stable-alpine";
-          ports = [ "8080:80" ];
-          volumes = [
-            "${dir}/nginx.conf:/etc/nginx/nginx.conf"
-            "${dir}/conf.d:/etc/nginx/conf.d"
-            "${dir}/log:/var/log/nginx"
-          ];
-          autoStart = true;
+      pma = {
+        image = "postgres:latest";
+        ports = [ "5432:5432" ];
+        autoStart = true;
+        environment = {
+          POSTGRES_PASSWORD = "siri";
+          POSTGRES_USER = "siri";
+          POSTGRES_DB = "backend-my";
         };
+      };
     };
   };
-  system.stateVersion = "23.11";
+  #
+  # virtualisation.oci-containers = {
+  #   backend = "docker";
+  #   containers = {
+  #     nginx =
+  #       let
+  #         dir = "/home/sirimhrzn/nixos-containers/nginx";
+  #       in
+  #       {
+  #         image = "nginx:stable-alpine";
+  #         ports = [ "8080:80" ];
+  #         volumes = [
+  #           "${dir}/nginx.conf:/etc/nginx/nginx.conf"
+  #           "${dir}/conf.d:/etc/nginx/conf.d"
+  #           "${dir}/log:/var/log/nginx"
+  #         ];
+  #         autoStart = true;
+  #       };
+  #   };
+  # };
+  system.stateVersion = "24.05";
 }

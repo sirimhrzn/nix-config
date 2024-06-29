@@ -46,15 +46,12 @@
   hardware.bluetooth.powerOnBoot = true;
   virtualisation.libvirtd.enable = true;
   boot.kernelModules = [ "kvm-intel" ];
-  # services.xserver.videoDrivers = [ "nvidia" ];
 
   programs.starship = {
     enable = true;
   };
   fonts.packages = [
     pkgs.noto-fonts
-    pkgs.noto-fonts-cjk
-    pkgs.noto-fonts-emoji
     pkgs.noto-fonts-emoji
     (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
@@ -80,20 +77,7 @@
     opengl.enable = true;
     nvidia.modesetting.enable = true;
   };
-
   services.gnome.gnome-keyring.enable = true;
-  # xdg.configFile."sway/config".source = pkgs.lib.mkOverride 0 "/home/sirimhrzn/.config/sway/config.in";
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-    package = pkgs.swayfx;
-    extraPackages = with pkgs; [
-      i3status
-      termite
-      rofi
-      light
-    ];
-  };
   services.xserver = {
     enable = true;
     displayManager = {
@@ -196,7 +180,6 @@
     pkgs.vim
     pkgs.wget
     pkgs.dunst
-    pkgs.libnotify
     pkgs.waybar
     pkgs.swww
     pkgs.polkit_gnome
@@ -207,68 +190,31 @@
     pkgs.zsh
     pkgs.polybar
     pkgs.rofi
-    pkgs.fluent-bit
     pkgs.brightnessctl
     pkgs.wofi
     pkgs.fish
     pkgs.git
     pkgs.jq
-    pkgs.sddm
     pkgs.kubectl
-    pkgs.xclip
     pkgs.clang
     pkgs.openvpn
     pkgs.ripgrep
     pkgs.openssl.dev
-    pkgs.eza
     pkgs.nginx
     pkgs.bun
     pkgs.wrk
     pkgs.lua54Packages.lua
     pkgs.luaformatter
     pkgs.uutils-coreutils-noprefix
+    pkgs.go-mtpfs
     unstable.kitty
     unstable.zellij
   ];
   services.openssh.enable = true;
-  services.rsyslogd = {
-    enable = true;
-    extraConfig = ''
-      $ModLoad imtcp
-      $InputTCPServerRun 514
-      if $programname == 'laravel' then /var/log/laravel.log
-      if $programname == 'nginx' then /var/log/nginx.log
-    '';
-  };
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
   };
-  #  services.k3s = {
-  # enable = true;
-  # package = pkgs.k3s;
-  # role = "server";
-  # clusterInit = true;
-  #  };
-  services.k3s =
-    let
-      master_ip = "192.168.5.251";
-    in
-    {
-      enable = true;
-      package = pkgs.k3s;
-      role = "server";
-      clusterInit = true;
-      extraFlags = "--cluster-init --datastore-endpoint=postgres://siri:siri@0.0.0.0:5432/backend-my  --advertise-address=${master_ip} --tls-san=${master_ip}";
-    };
-
-  # Enable and configure etcd
-  # services.etcd = {
-  #   enable = true;
-  #   listenClientUrls = [ "http://0.0.0.0:2379" ];
-  #   advertiseClientUrls = [ "http://192.168.5.251:2379" ];
-  # };
-  #
   virtualisation.oci-containers = {
     backend = "docker";
     containers = {
@@ -284,25 +230,5 @@
       };
     };
   };
-  #
-  # virtualisation.oci-containers = {
-  #   backend = "docker";
-  #   containers = {
-  #     nginx =
-  #       let
-  #         dir = "/home/sirimhrzn/nixos-containers/nginx";
-  #       in
-  #       {
-  #         image = "nginx:stable-alpine";
-  #         ports = [ "8080:80" ];
-  #         volumes = [
-  #           "${dir}/nginx.conf:/etc/nginx/nginx.conf"
-  #           "${dir}/conf.d:/etc/nginx/conf.d"
-  #           "${dir}/log:/var/log/nginx"
-  #         ];
-  #         autoStart = true;
-  #       };
-  #   };
-  # };
   system.stateVersion = "24.05";
 }

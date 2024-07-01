@@ -55,7 +55,19 @@
     pkgs.noto-fonts-emoji
     (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true;
+    package = pkgs.swayfx;
+    extraPackages = with pkgs; [
+      i3status
+      termite
+      rofi
+      light
+    ];
+  };
 
+ 
   programs.zsh.enable = true;
   services.pipewire = {
     enable = true;
@@ -144,7 +156,7 @@
       unstable.git-cliff
       unstable.delta
       unstable.helix
-      unstable.zed-editor
+      pkgs.zed-editor
     ];
   };
 

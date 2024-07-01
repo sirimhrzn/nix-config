@@ -8,19 +8,7 @@ let
   smod = config.wayland.windowManager.sway.config.modifier;
 in
 {
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-    package = pkgs.swayfx;
-    extraPackages = with pkgs; [
-      i3status
-      termite
-      rofi
-      light
-    ];
-  };
-
-  wayland.windowManager.sway = {
+ wayland.windowManager.sway = {
     enable = true;
     checkConfig = false;
     package = pkgs.swayfx;

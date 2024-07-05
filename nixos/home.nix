@@ -69,8 +69,12 @@
       userEmail = "shirishmaharjan64@gmail.com";
       userName = "sirimhrzn";
     };
-
-    zsh = {
+  };
+  programs.zsh = 
+  let
+  	secrets = builtins.readFile ./secrets;
+  in
+  {
       enable = true;
       autocd = true;
       # autoSuggestion.enable = true;
@@ -85,11 +89,13 @@
       shellAliases = {
         nnn = "bash ~/Documents/geniusvpn/startgpn.sh";
         zel = "zellij -l ~/layout.kdl";
+        nv = "fzf | xargs nvim";
+        kb = "~/.cargo/bin/rust-kanban";
       };
-
+      
       envExtra = ''
-        export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:$HOME/.local/bin
+${secrets}
       '';
-    };
   };
 }

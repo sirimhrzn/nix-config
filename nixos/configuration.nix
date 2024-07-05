@@ -47,6 +47,22 @@
   virtualisation.libvirtd.enable = true;
   boot.kernelModules = [ "kvm-intel" ];
 
+  # xdg.portal.enable = true;
+  xdg.autostart.enable = true;
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config.common.default = "*";
+  };
+  # xdg.portal.extraPortals = with pkgs; [
+  #   xdg-desktop-portal-hyprland
+  #   xdg-desktop-portal
+  #   xdg-desktop-portal-gtk
+  # ];
+
   programs.starship = {
     enable = true;
   };
@@ -67,7 +83,6 @@
     ];
   };
 
- 
   programs.zsh.enable = true;
   services.pipewire = {
     enable = true;
@@ -219,6 +234,13 @@
     pkgs.luaformatter
     pkgs.uutils-coreutils-noprefix
     pkgs.go-mtpfs
+    pkgs.fd
+    pkgs.just
+    pkgs.mariadb
+    pkgs.podman
+    pkgs.gcc
+    pkgs.liburing
+    pkgs.hyperfine
     unstable.kitty
     unstable.zellij
   ];

@@ -8,7 +8,7 @@ let
   smod = config.wayland.windowManager.sway.config.modifier;
 in
 {
- wayland.windowManager.sway = {
+  wayland.windowManager.sway = {
     enable = true;
     checkConfig = false;
     package = pkgs.swayfx;

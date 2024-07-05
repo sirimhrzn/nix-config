@@ -5,14 +5,6 @@
   ...
 }:
 {
-  xdg.portal.enable = true;
-  xdg.autostart.enable = true;
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-hyprland
-    xdg-desktop-portal
-    xdg-desktop-portal-gtk
-  ];
-
   wayland.windowManager.hyprland = {
     enable = true;
     package = pkgs.hyprland;
@@ -79,7 +71,7 @@
       exec-once = waybar
       $mainMod = SUPER
       $terminal = kitty
-      bind = $mainMod, D, exec, pkill -x rofi || rofi -show drun
+      bind = $mainMod, D, exec, pkill -x wofi || wofi --show drun
       bind = $mainMod, T, exec, $terminal
       bind = , XF86AudioMute, exec, pamixer --toggle-mute
       bind = , XF86AudioRaiseVolume, exec, pamixer --increase 5

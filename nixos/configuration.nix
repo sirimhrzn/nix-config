@@ -23,6 +23,11 @@
     };
   };
   security.polkit.enable = true;
+  services.mysql = {
+  enable = true;
+  package = pkgs.mariadb;
+};
+
 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
@@ -105,15 +110,15 @@
     nvidia.modesetting.enable = true;
   };
   services.gnome.gnome-keyring.enable = true;
-  services.xserver = {
-    enable = true;
-    displayManager = {
-      gdm = {
-        enable = true;
-        wayland = true;
-      };
-    };
-  };
+  # services.xserver = {
+  #   enable = true;
+  #   displayManager = {
+  #     gdm = {
+  #       enable = true;
+  #       wayland = true;
+  #     };
+  #   };
+  # };
 
   services.blueman.enable = true;
   users.groups.sirimhrzn = { };
@@ -135,7 +140,6 @@
       pkgs.acpi
       pkgs.yazi
       pkgs.gnome.nautilus
-      pkgs.vlc
       pkgs.gitui
       pkgs.cargo
       pkgs.bat
@@ -160,18 +164,19 @@
       pkgs.neovim
       pkgs.virt-manager
       pkgs.virt-viewer
+      pkgs.lite-xl
 
+      unstable.wezterm
+      unstable.zed-editor
       unstable.nodePackages.npm
       unstable.go
       unstable.gopls
       unstable.glab
       unstable.vscode
       unstable.alacritty
-      unstable.wezterm
       unstable.git-cliff
       unstable.delta
       unstable.helix
-      pkgs.zed-editor
     ];
   };
 
@@ -241,6 +246,9 @@
     pkgs.gcc
     pkgs.liburing
     pkgs.hyperfine
+    pkgs.ffmpeg
+    unstable.zig
+    pkgs.lapce
     unstable.kitty
     unstable.zellij
   ];
@@ -249,20 +257,54 @@
     enable = true;
     enableOnBoot = true;
   };
+  # virtualisation.oci-containers = {
+  #   backend = "docker";
+  #   containers = {
+  #     pma = {
+  #       image = "postgres:latest";
+  #       ports = [ "5432:5432" ];
+  #       autoStart = true;
+  #       environment = {
+  #         POSTGRES_PASSWORD = "siri";
+  #         POSTGRES_USER = "siri";
+  #         POSTGRES_DB = "backend-my";
+  #       };
+  #     };
+  #   };
+  # };
   virtualisation.oci-containers = {
     backend = "docker";
     containers = {
       pma = {
-        image = "postgres:latest";
-        ports = [ "5432:5432" ];
-        autoStart = true;
+        image = "mariadb:latest";
+        ports = [ "3306:3306" ];
+        autoStart = false;
         environment = {
-          POSTGRES_PASSWORD = "siri";
-          POSTGRES_USER = "siri";
-          POSTGRES_DB = "backend-my";
+          MYSQL_ROOT_PASSWORD = "siri";
+          MYSQL_USER = "siri";
+          MYSQL_DATABASE = "news";
+          MYSQL_PASSWORD = "siri";
         };
+        volumes = [ "mysql_data:/var/lib/mysql" ];
       };
+      # elasticsearch = {
+      #   image = "elasticsearch:7.17.22";
+      #   environment = {
+      #     "discovery.type" = "single-node";
+      #     "ES_JAVA_OPTS" = "-Xms512m -Xmx512m";
+      #   };
+      #   ports = [ "9200:9200" ];
+      #   volumes = [ "elasticsearch-data:/usr/share/elasticsearch/data" ];
+      # };
+      # kibana = {
+      #   image = "kibana:7.17.22";
+      #   environment = {
+      #     "ELASTICSEARCH_HOSTS" = "http://172.17.0.4:9200";
+      #   };
+      #   ports = [ "5601:5601" ];
+      # };
     };
   };
+
   system.stateVersion = "24.05";
 }

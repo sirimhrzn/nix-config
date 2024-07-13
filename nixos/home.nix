@@ -7,12 +7,15 @@
 {
   imports = [
     ./swaywm.nix
-    # ./hypr.nix
+    #./hypr.nix
   ];
   home.username = "sirimhrzn";
   home.homeDirectory = "/home/sirimhrzn";
 
-  home.packages = [ pkgs.kitty-themes ];
+  home.packages = [
+    pkgs.kitty-themes
+    pkgs.wlsunset
+  ];
 
   home.pointerCursor = {
     gtk.enable = true;
@@ -26,7 +29,7 @@
     font.name = "JetBrainsMono Nerd Font";
     theme = "Tomorrow Night Eighties";
     settings = {
-      background_opacity = "0.0";
+      background_opacity = "60.0";
     };
   };
   home.stateVersion = "24.05";
@@ -70,11 +73,11 @@
       userName = "sirimhrzn";
     };
   };
-  programs.zsh = 
-  let
-  	secrets = builtins.readFile ./secrets;
-  in
-  {
+  programs.zsh =
+    let
+      secrets = builtins.readFile ./secrets;
+    in
+    {
       enable = true;
       autocd = true;
       # autoSuggestion.enable = true;
@@ -91,11 +94,13 @@
         zel = "zellij -l ~/layout.kdl";
         nv = "fzf | xargs nvim";
         kb = "~/.cargo/bin/rust-kanban";
+        gl = "git log --oneline";
+	idid = "nvim ~/idid.md";
       };
-      
+
       envExtra = ''
-export PATH=$PATH:$HOME/.local/bin
-${secrets}
+        export PATH=$PATH:$HOME/.local/bin
+        ${secrets}
       '';
-  };
+    };
 }

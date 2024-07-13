@@ -14,7 +14,7 @@
         gaps_in = 0;
         gaps_out = 0;
         border_size = 2;
-        # col.active_border = "rgb(4B0082)";
+        "col.active_border" = "rgb(4B0082)";
       };
       input = {
         kb_layout = "us";
@@ -30,7 +30,7 @@
         rounding = 6;
         blur = {
           enabled = true;
-          size = 4;
+          size = 5;
           passes = 1;
           new_optimizations = true;
         };
@@ -38,30 +38,25 @@
       "$mod" = "SUPER";
       bind =
         [
-          "$mod, F, exec, firefox"
           ", Print, exec, grimblast copy area"
           "$mod SHIFT,Q ,killactive"
         ]
-        ++ (
-          # workspaces
-          # binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
-          builtins.concatLists (
-            builtins.genList (
-              x:
-              let
-                ws =
-                  let
-                    c = (x + 1) / 10;
-                  in
-                  builtins.toString (x + 1 - (c * 10));
-              in
-              [
-                "$mod, ${ws}, workspace, ${toString (x + 1)}"
-                "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
-              ]
-            ) 10
-          )
-        );
+        ++ (builtins.concatLists (
+          builtins.genList (
+            x:
+            let
+              ws =
+                let
+                  c = (x + 1) / 10;
+                in
+                builtins.toString (x + 1 - (c * 10));
+            in
+            [
+              "$mod, ${ws}, workspace, ${toString (x + 1)}"
+              "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
+            ]
+          ) 10
+        ));
     };
     extraConfig = ''
       exec-once = swww-daemon
@@ -71,6 +66,10 @@
       exec-once = waybar
       $mainMod = SUPER
       $terminal = kitty
+      $night_light_on = wlsunset -T 4500
+      $night_light_off = pkill wlsunset
+
+      bind = SUPER ALT, N, exec, $night_light_on || $night_light_off
       bind = $mainMod, D, exec, pkill -x wofi || wofi --show drun
       bind = $mainMod, T, exec, $terminal
       bind = , XF86AudioMute, exec, pamixer --toggle-mute
@@ -79,10 +78,10 @@
       bind = , XF86MonBrightnessUp, exec, brightnessctl set +5%
       bind = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
       bind = $mainMod, P, exec, grimblast copysave area
-
-
-
-      windowrule = float,^(rofi)$
+      bind = $mainMod, F, fullscreen, 0
+      env = WLR_RENDERER,pixman
+      env = WLR_NO_HARDWARE_CURSORS,1
+      windowrule = float,^(rofi|blue.*)$
     '';
     systemd = {
       enable = true;

@@ -76,16 +76,9 @@ in
   services.greetd = {
     enable = true;
     package = pkgs.greetd.tuigreet;
-    settings = rec {
-      greetdCommand = "${pkgs.greetd.tuigreet}/bin/tuigreet";
-      sway = "${pkgs.sway}/bin/sway";
-      hypr = "${pkgs.hyprland}/bin/hyprland";
+    settings = {
       default_session = {
-        command =
-          if windowManager == "sway" then
-            "${greetdCommand} --cmd ${sway}"
-          else
-            "${greetdCommand} --cmd ${hypr}";
+        command = (wm: "${pkgs.greetd.tuigreet}/bin/tuigreet --cmd ${wm}") windowManager;
       };
     };
   };

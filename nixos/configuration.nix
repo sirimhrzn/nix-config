@@ -9,7 +9,7 @@
   ...
 }:
 let
-  windowManager = "hyprland";
+  windowManager = "sway";
 in
 {
   imports = [

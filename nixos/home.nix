@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  secrets = import ./secrets.nix { inherit pkgs lib; };
+in
 {
   imports = [
     ./swaywm.nix
@@ -71,42 +74,38 @@
       userName = "sirimhrzn";
     };
   };
-  programs.zsh =
-    let
-      secrets = if builtins.pathExists ./secrets then builtins.readFile ./secrets else "";
-    in
-    {
-      enable = true;
-      autocd = true;
-      # autoSuggestion.enable = true;
-      defaultKeymap = "emacs";
-      history.size = 100000;
-      history.save = 100000;
-      history.expireDuplicatesFirst = true;
-      history.ignoreDups = true;
-      history.ignoreSpace = true;
-      historySubstringSearch.enable = true;
+  programs.zsh = {
+    enable = true;
+    autocd = true;
+    # autoSuggestion.enable = true;
+    defaultKeymap = "emacs";
+    history.size = 100000;
+    history.save = 100000;
+    history.expireDuplicatesFirst = true;
+    history.ignoreDups = true;
+    history.ignoreSpace = true;
+    historySubstringSearch.enable = true;
 
-      shellAliases = {
-        nnn = "bash ~/Documents/geniusvpn/startgpn.sh";
-        zel = "zellij -l ~/layout.kdl";
-        nv = "fzf | xargs nvim";
-        kb = "~/.cargo/bin/rust-kanban";
-        gl = "git log --oneline";
-        idid = "nvim ~/idid.md";
-        ket = "kubectl get pods | rg ";
-        kex = "kubectl exec -it ";
-        k = "kubectl";
-        d = "docker";
-        dc = "docker compose";
-        ".." = "cd ..";
-        "...." = "cd ../..";
-      };
-
-      envExtra = ''
-                export PATH=$PATH:$HOME/.local/bin
-        	export KUBE_EDITOR=nvim
-                ${secrets}
-      '';
+    shellAliases = {
+      nnn = "bash ~/Documents/geniusvpn/startgpn.sh";
+      zel = "zellij -l ~/layout.kdl";
+      nv = "fzf | xargs nvim";
+      kb = "~/.cargo/bin/rust-kanban";
+      gl = "git log --oneline";
+      idid = "nvim ~/idid.md";
+      ket = "kubectl get pods | rg ";
+      kex = "kubectl exec -it ";
+      k = "kubectl";
+      d = "docker";
+      dc = "docker compose";
+      ".." = "cd ..";
+      "...." = "cd ../..";
     };
+
+    envExtra = ''
+      export PATH=$PATH:$HOME/.local/bin
+      export KUBE_EDITOR=nvim
+      ${secrets.secret.hooks}
+    '';
+  };
 }

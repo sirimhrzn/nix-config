@@ -1,8 +1,10 @@
 { pkgs, lib, ... }:
 let
-  secrets = pkgs.lib.importTOML ./secrets.toml;
-  database = secrets.database;
-  aliaser =
+  conf = lib.importTOML ./secrets.toml;
+  database = conf.database;
+  concatToStr = f: builtins.concatStringsSep "\n" f;
+
+  attrToAlias =
     {
       alias,
       host,
@@ -10,33 +12,28 @@ let
       password,
     }:
     "alias -- '${alias}'='mariadb -h ${host} -u ${username} -p${password}'";
-  databaseVars = builtins.mapAttrs (
-    env: envName:
-    builtins.attrValues (
-      builtins.mapAttrs (key: val: val) (
-        builtins.mapAttrs (
-          alias: aliasValue:
-          let
-            alVal = aliaser {
-              inherit (aliasValue) host username password;
-              inherit alias;
-            };
-          in
-          "${alVal}"
-        ) envName
-      )
-    )
-  ) database.env;
-  shellHook = builtins.concatLists (
-    map (
-      value: if builtins.isList value then builtins.concatLists (map (val: [ val ]) value) else [ value ]
+  dbConfigToAlias =
+    { conf, env }:
+    builtins.mapAttrs (
+      alias: dbConfig:
+      attrToAlias {
+        inherit (dbConfig) password host username;
+        alias = "${alias}${env}";
+      }
+    ) conf;
 
-    ) (builtins.attrValues databaseVars)
-  );
+  envMapped = builtins.mapAttrs (
+    env: conf:
+    let
+      withAliases = dbConfigToAlias { inherit env conf; };
+      aliasHook = concatToStr (builtins.attrValues withAliases);
+    in
+    aliasHook
+  ) database.env;
+  combinedEnvMappedAlias = concatToStr (builtins.attrValues envMapped);
 in
 {
   secret = {
-    hooks =
-      if (builtins.pathExists ./secrets.toml) then builtins.concatStringsSep "\n" shellHook else "";
+    mariaDbHooks = combinedEnvMappedAlias;
   };
 }

@@ -105,7 +105,7 @@ in
     envExtra = ''
       export PATH=$PATH:$HOME/.local/bin
       export KUBE_EDITOR=nvim
-      ${secrets.secret.hooks}
+      ${secrets.secret.mariaDbHooks}
     '';
   };
 }

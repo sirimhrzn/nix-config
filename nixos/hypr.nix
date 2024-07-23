@@ -31,7 +31,7 @@
         blur = {
           enabled = true;
           size = 5;
-          passes = 1;
+          passes = 3;
           new_optimizations = true;
         };
       };
@@ -62,7 +62,7 @@
       exec-once = swww-daemon
       exec-once = nm-applet
       exec-once = blueman-applet 
-      exec-once = swww img ~/Downloads/purple.png
+      exec-once = swww img ~/Downloads/purpleeyes.png
       exec-once = waybar
       $mainMod = SUPER
       $terminal = kitty
@@ -79,9 +79,18 @@
       bind = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
       bind = $mainMod, P, exec, grimblast copysave area
       bind = $mainMod, F, fullscreen, 0
+      bind = $mainMod, V, togglefloating,
+      bind = $mainMod, H, movefocus, l
+      bind = $mainMod, L, movefocus, r
+      bind = $mainMod, K, movefocus, u
+      bind = $mainMod, J, movefocus, d
+
+
       env = WLR_RENDERER,pixman
       env = WLR_NO_HARDWARE_CURSORS,1
       windowrule = float,^(rofi|blue.*)$
+      windowrule = opacity 0.7 0.6,^(Alacritty|kitty|postman.*|wezterm-gui)$
+      # windowrule = blur,^(kitty)$
     '';
     systemd = {
       enable = true;

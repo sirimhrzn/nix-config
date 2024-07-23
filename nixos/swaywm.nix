@@ -9,9 +9,9 @@ let
 in
 {
   wayland.windowManager.sway = {
-    enable = true;
+    enable = false;
     checkConfig = false;
-    package = pkgs.swayfx;
+    package = pkgs.sway;
     config = rec {
       modifier = "Mod4";
       terminal = "kitty";
@@ -20,7 +20,7 @@ in
         { command = "nm-applet"; }
         { command = "blueman-applet"; }
         { command = "swww-daemon"; }
-        { command = "swww img ~/Downloads/purple.png"; }
+        { command = "swww img ~/Downloads/m.jpg"; }
       ];
       keybindings = lib.mkOptionDefault {
         "${smod}+d" = "exec pkill -x rofi || rofi -show drun";
@@ -30,6 +30,7 @@ in
         "XF86AudioLowerVolume" = "exec  pamixer --decrease 5";
         "XF86MonBrightnessUp" = "exec brightnessctl set +5%";
         "XF86MonBrightnessDown" = "exec brightnessctl set 5%-";
+        "${smod}+n" = "exec pkill wl-sunset || wlsunset -T 4500";
         "${smod}+p" = "exec grimblast copysave area";
       };
       bars = [ ];
@@ -44,30 +45,21 @@ in
           repeat_rate = "80";
         };
       };
-      colors = {
-        focused = {
-          background = "#800080";
-          border = "#800080";
-          childBorder = "#800080";
-          indicator = "#2e9ef4";
-          text = "#ffffff";
-        };
-      };
     };
     extraConfig = ''
-      blur enable
-      blur_xray disable
-      blur_passes 2
-      blur_radius 5
-
-      # Window border settings
-      default_border pixel 2
-      default_floating_border pixel 2
-      smart_borders off
-
-      # Additional window rules (optional)
-      for_window [app_id=".*"] opacity 0.90
-      for_window [class=".*"] opacity 0.90
+            #swayfx config
+            # blur enable
+            # blur_xray disable
+            # blur_passes 2
+            # blur_radius 5
+            # # Window border settings
+            default_border none
+      	default_floating_border none
+      	titlebar_padding 1
+      	titlebar_border_thickness 0
+            # # Additional window rules (optional)
+            # for_window [app_id=".*"] opacity 0.90
+            # for_window [class=".*"] opacity 0.90
     '';
   };
 }

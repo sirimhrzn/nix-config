@@ -18,6 +18,7 @@
     "ahci"
     "nvme"
     "usb_storage"
+    "usbhid"
     "sd_mod"
   ];
   boot.initrd.kernelModules = [ ];
@@ -25,36 +26,33 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
-    device = "zpool/root";
-    fsType = "zfs";
-  };
-
-  fileSystems."/var" = {
-    device = "zpool/var";
-    fsType = "zfs";
+    device = "/dev/disk/by-uuid/6759b392-92bc-43ad-bc6e-e3a435970599";
+    fsType = "btrfs";
+    options = [ "subvol=root" ];
   };
 
   fileSystems."/home" = {
-    device = "zpool/home";
-    fsType = "zfs";
+    device = "/dev/disk/by-uuid/6759b392-92bc-43ad-bc6e-e3a435970599";
+    fsType = "btrfs";
+    options = [ "subvol=home" ];
   };
 
   fileSystems."/nix" = {
-    device = "zpool/nix";
-    fsType = "zfs";
+    device = "/dev/disk/by-uuid/6759b392-92bc-43ad-bc6e-e3a435970599";
+    fsType = "btrfs";
+    options = [ "subvol=nix" ];
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/0549-256C";
+    device = "/dev/disk/by-uuid/12CE-A600";
     fsType = "vfat";
     options = [
-      "fmask=0077"
-      "dmask=0077"
+      "fmask=0022"
+      "dmask=0022"
     ];
   };
-  networking.hostId = "abcd1234";
 
-  swapDevices = [ { device = "/dev/disk/by-uuid/115e7497-3ff2-425c-a6ea-eb7770260f8d"; } ];
+  swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

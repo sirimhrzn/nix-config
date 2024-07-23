@@ -8,6 +8,9 @@
   inputs,
   ...
 }:
+let
+  windowManager = "hyprland";
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -16,7 +19,7 @@
   ];
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs windowManager;
     };
     users = {
       "sirimhrzn" = import ./home.nix;
@@ -24,10 +27,9 @@
   };
   security.polkit.enable = true;
   services.mysql = {
-  enable = true;
-  package = pkgs.mariadb;
-};
-
+    enable = true;
+    package = pkgs.mariadb;
+  };
 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
@@ -35,6 +37,14 @@
     zfsSupport = true;
     efiSupport = true;
     device = "nodev";
+  };
+  fileSystems = {
+    "/".options = [ "compress=zstd" ];
+    "/home".options = [ "compress=zstd" ];
+    "/nix".options = [
+      "compress=zstd"
+      "noatime"
+    ];
   };
   nix.settings.experimental-features = [
     "nix-command"
@@ -62,27 +72,38 @@
     ];
     config.common.default = "*";
   };
-  # xdg.portal.extraPortals = with pkgs; [
-  #   xdg-desktop-portal-hyprland
-  #   xdg-desktop-portal
-  #   xdg-desktop-portal-gtk
-  # ];
+
+  services.greetd = {
+    enable = true;
+    settings = rec {
+      initial_session = {
+        command =
+          if windowManager == "sway" then "${pkgs.sway}/bin/sway" else "${pkgs.hyprland}/bin/hyprland";
+        user = "sirimhrzn";
+      };
+      default_session = initial_session;
+    };
+  };
 
   programs.starship = {
     enable = true;
   };
+
   fonts.packages = [
     pkgs.noto-fonts
     pkgs.noto-fonts-emoji
-    (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+    (pkgs.nerdfonts.override {
+      fonts = [
+        "JetBrainsMono"
+        "ComicShannsMono"
+      ];
+    })
   ];
   programs.sway = {
-    enable = true;
+    enable = if windowManager == "sway" then true else false;
     wrapperFeatures.gtk = true;
-    package = pkgs.swayfx;
+    package = pkgs.sway;
     extraPackages = with pkgs; [
-      i3status
-      termite
       rofi
       light
     ];
@@ -98,8 +119,6 @@
   };
   programs.light.enable = true;
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
   networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   networking.networkmanager.enable = true;
   time.timeZone = "Asia/Kathmandu";
@@ -109,16 +128,17 @@
     opengl.enable = true;
     nvidia.modesetting.enable = true;
   };
+
   services.gnome.gnome-keyring.enable = true;
-  # services.xserver = {
-  #   enable = true;
-  #   displayManager = {
-  #     gdm = {
-  #       enable = true;
-  #       wayland = true;
-  #     };
-  #   };
-  # };
+  services.xserver = {
+    enable = false;
+    displayManager = {
+      gdm = {
+        enable = true;
+        wayland = true;
+      };
+    };
+  };
 
   services.blueman.enable = true;
   users.groups.sirimhrzn = { };
@@ -165,8 +185,8 @@
       pkgs.virt-manager
       pkgs.virt-viewer
       pkgs.lite-xl
+      pkgs.wezterm
 
-      unstable.wezterm
       unstable.zed-editor
       unstable.nodePackages.npm
       unstable.go
@@ -200,11 +220,6 @@
       80
       443
       9000
-      5432
-      6443
-      10250
-      2379
-      2380
     ];
   };
 
@@ -247,62 +262,50 @@
     pkgs.liburing
     pkgs.hyperfine
     pkgs.ffmpeg
+    pkgs.zellij
+    pkgs.kitty
+
     unstable.zig
-    pkgs.lapce
-    unstable.kitty
-    unstable.zellij
   ];
+
   services.openssh.enable = true;
+
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
   };
-  # virtualisation.oci-containers = {
-  #   backend = "docker";
-  #   containers = {
-  #     pma = {
-  #       image = "postgres:latest";
-  #       ports = [ "5432:5432" ];
-  #       autoStart = true;
-  #       environment = {
-  #         POSTGRES_PASSWORD = "siri";
-  #         POSTGRES_USER = "siri";
-  #         POSTGRES_DB = "backend-my";
-  #       };
-  #     };
-  #   };
-  # };
+
   virtualisation.oci-containers = {
     backend = "docker";
     containers = {
-      pma = {
-        image = "mariadb:latest";
-        ports = [ "3306:3306" ];
+      elasticsearch = {
+        image = "elasticsearch:7.17.22";
         autoStart = false;
         environment = {
-          MYSQL_ROOT_PASSWORD = "siri";
-          MYSQL_USER = "siri";
-          MYSQL_DATABASE = "news";
-          MYSQL_PASSWORD = "siri";
+          "discovery.type" = "single-node";
+          "ES_JAVA_OPTS" = "-Xms512m -Xmx512m";
         };
-        volumes = [ "mysql_data:/var/lib/mysql" ];
+        ports = [ "9200:9200" ];
+        volumes = [ "elasticsearch-data:/usr/share/elasticsearch/data" ];
       };
-      # elasticsearch = {
-      #   image = "elasticsearch:7.17.22";
-      #   environment = {
-      #     "discovery.type" = "single-node";
-      #     "ES_JAVA_OPTS" = "-Xms512m -Xmx512m";
-      #   };
-      #   ports = [ "9200:9200" ];
-      #   volumes = [ "elasticsearch-data:/usr/share/elasticsearch/data" ];
-      # };
-      # kibana = {
-      #   image = "kibana:7.17.22";
-      #   environment = {
-      #     "ELASTICSEARCH_HOSTS" = "http://172.17.0.4:9200";
-      #   };
-      #   ports = [ "5601:5601" ];
-      # };
+      kibana = {
+        image = "kibana:7.17.22";
+        autoStart = false;
+        environment = {
+          "ELASTICSEARCH_HOSTS" = "http://172.17.0.4:9200";
+        };
+        ports = [ "5601:5601" ];
+      };
+      pma = {
+        image = "postgres:latest";
+        ports = [ "5432:5432" ];
+        autoStart = false;
+        environment = {
+          POSTGRES_PASSWORD = "siri";
+          POSTGRES_USER = "siri";
+          POSTGRES_DB = "backend-my";
+        };
+      };
     };
   };
 

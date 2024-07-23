@@ -7,7 +7,7 @@
 {
   imports = [
     ./swaywm.nix
-    #./hypr.nix
+    ./hypr.nix
   ];
   home.username = "sirimhrzn";
   home.homeDirectory = "/home/sirimhrzn";
@@ -26,10 +26,12 @@
 
   programs.kitty = {
     enable = true;
-    font.name = "JetBrainsMono Nerd Font";
-    theme = "Tomorrow Night Eighties";
+    font.name = "ComicShannsMono Nerd Font";
+    theme = "Fideloper";
     settings = {
       background_opacity = "60.0";
+      term = "xterm-256color";
+      font_size = "11.0";
     };
   };
   home.stateVersion = "24.05";
@@ -49,12 +51,8 @@
 
     fzf.enable = true;
     fzf.enableZshIntegration = true;
-    # lsd.enable = true;
-    # lsd.enableAliases = true;
     zoxide.enable = true;
     zoxide.enableZshIntegration = true;
-    # broot.enable = true;
-    # broot.enableZshIntegration = true;
 
     direnv.enable = true;
     direnv.enableZshIntegration = true;
@@ -75,7 +73,7 @@
   };
   programs.zsh =
     let
-      secrets = builtins.readFile ./secrets;
+      secrets = if builtins.pathExists ./secrets then builtins.readFile ./secrets else "";
     in
     {
       enable = true;
@@ -95,12 +93,20 @@
         nv = "fzf | xargs nvim";
         kb = "~/.cargo/bin/rust-kanban";
         gl = "git log --oneline";
-	idid = "nvim ~/idid.md";
+        idid = "nvim ~/idid.md";
+        ket = "kubectl get pods | rg ";
+        kex = "kubectl exec -it ";
+        k = "kubectl";
+        d = "docker";
+        dc = "docker compose";
+        ".." = "cd ..";
+        "...." = "cd ../..";
       };
 
       envExtra = ''
-        export PATH=$PATH:$HOME/.local/bin
-        ${secrets}
+                export PATH=$PATH:$HOME/.local/bin
+        	export KUBE_EDITOR=nvim
+                ${secrets}
       '';
     };
 }

@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.grafana = {
-    enable = true;
+    enable = false;
     settings = {
       server = {
         http_port = 2362;

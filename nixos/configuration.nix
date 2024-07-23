@@ -75,13 +75,18 @@ in
 
   services.greetd = {
     enable = true;
+    package = pkgs.greetd.tuigreet;
     settings = rec {
-      initial_session = {
+      greetdCommand = "${pkgs.greetd.tuigreet}/bin/tuigreet";
+      sway = "${pkgs.sway}/bin/sway";
+      hypr = "${pkgs.hyprland}/bin/hyprland";
+      default_session = {
         command =
-          if windowManager == "sway" then "${pkgs.sway}/bin/sway" else "${pkgs.hyprland}/bin/hyprland";
-        user = "sirimhrzn";
+          if windowManager == "sway" then
+            "${greetdCommand} --cmd ${sway}"
+          else
+            "${greetdCommand} --cmd ${hypr}";
       };
-      default_session = initial_session;
     };
   };
 

@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  windowManager,
   ...
 }:
 let
@@ -9,7 +10,7 @@ let
 in
 {
   wayland.windowManager.sway = {
-    enable = false;
+    enable = if windowManager == "sway" then true else false;
     checkConfig = false;
     package = pkgs.sway;
     config = rec {

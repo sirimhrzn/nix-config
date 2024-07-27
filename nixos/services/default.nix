@@ -1,4 +1,4 @@
 { config, ... }:
 {
-  imports = [ ./grafana.nix ];
+  imports = [ ./grafana.nix ./rsyslog.nix ];
 }

@@ -34,6 +34,6 @@ let
 in
 {
   secret = {
-    mariaDbHooks = combinedEnvMappedAlias;
+    mariaDbHooks = if builtins.pathExists ./secrets.toml then combinedEnvMappedAlias else "";
   };
 }

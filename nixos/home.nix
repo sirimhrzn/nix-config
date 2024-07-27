@@ -77,7 +77,7 @@ in
   programs.zsh = {
     enable = true;
     autocd = true;
-    # autoSuggestion.enable = true;
+    autosuggestion.enable = false;
     defaultKeymap = "emacs";
     history.size = 100000;
     history.save = 100000;
@@ -100,6 +100,10 @@ in
       dc = "docker compose";
       ".." = "cd ..";
       "...." = "cd ../..";
+      cal = "php -S localhost:8001 -t public";
+      news = "php artisan serve --port 8002";
+      rad = "php artisan serve --port 8003";
+      ni = "nvim ~/nixos";
     };
 
     envExtra = ''

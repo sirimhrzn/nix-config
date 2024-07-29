@@ -4,6 +4,11 @@ let
   database = conf.database;
   concatToStr = f: builtins.concatStringsSep "\n" f;
 
+  hostConfToStrList = builtins.mapAttrs (hostName: hostConf:
+  	"${hostConf.ip} ${hostConf.hostname}"
+  ) conf.hostnames ;
+  hostConf = concatToStr (builtins.attrValues hostConfToStrList) ;
+
   attrToAlias =
     {
       alias,
@@ -35,5 +40,6 @@ in
 {
   secret = {
     mariaDbHooks = if builtins.pathExists ./secrets.toml then combinedEnvMappedAlias else "";
+    hostNameConfig = hostConf;
   };
 }

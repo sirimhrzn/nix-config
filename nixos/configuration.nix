@@ -9,7 +9,8 @@
   ...
 }:
 let
-  windowManager = "sway";
+  windowManager = "hyprland";
+  secrets = import ./secrets.nix { inherit (pkgs) lib; inherit pkgs; };
 in
 {
   imports = [
@@ -30,6 +31,10 @@ in
     enable = true;
     package = pkgs.mariadb;
   };
+
+  networking.extraHosts = ''
+${secrets.secret.hostNameConfig}
+'';
 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
